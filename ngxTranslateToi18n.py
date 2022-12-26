@@ -23,8 +23,8 @@ print("Recursively replacing ", path, " with values from ", json_path)
 with open(json_path) as f:
   translations = json.load(f)
 
-translation_regex = "{{ *\n* *['|\"][A-z.\d]+['|\"] \| translate *\n* *}}"
-translation_capture = "{{ *\n* *['|\"]([A-z.]+)['|\"] \| translate *\n* *}}"
+translation_regex = "{{ *\n* *['|\"][A-z.\d]+['|\"] *\n* *\|*\n* *translate *\n* *}}"
+translation_capture = "{{ *\n* *['|\"]([A-z.]+)['|\"] *\n* *\|*\n* *translate *\n* *}}"
 
 # Recursively oop through each directory
 for dname, dirs, files in os.walk(path):

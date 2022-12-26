@@ -26,6 +26,10 @@ with open(json_path) as f:
 translation_regex = "{{ *\n* *['|\"][A-z.\d]+['|\"] *\n* *\|*\n* *translate *\n* *}}"
 translation_capture = "{{ *\n* *['|\"]([A-z.]+)['|\"] *\n* *\|*\n* *translate *\n* *}}"
 
+# Show snackbar
+snackbar_regex = "showSnackbar\(['|\"].*['|\"], false\)"
+snackbar_capture = "showSnackbar\(['|\"](.*)['|\"], false\)"
+
 # Recursively oop through each directory
 for dname, dirs, files in os.walk(path):
     # Loop through the corresponding files 
@@ -34,11 +38,10 @@ for dname, dirs, files in os.walk(path):
           # Open the file and store the content in a variable 
           fpath = os.path.join(dname, fname)
           if (fpath.endswith(".html")):
-            
             with open(fpath) as f:
-              content = f.read()
+              content_html = f.read()
             # Find corresponding matches
-            matches = re.findall(translation_regex, content)
+            matches = re.findall(translation_regex, content_html)
             for match in matches:
               capture_keys = re.search(translation_capture, match)
               if (capture_keys):
@@ -62,12 +65,38 @@ for dname, dirs, files in os.walk(path):
                 print("**********************************************************")
                 continue
               translation = current_json
-              content = content.replace(match, translation)
-              
-            
-            # Write the new content to the file again 
+              content_html = content_html.replace(match, translation)
+            # Write the new content_html to the file again 
             with open(fpath, "w") as f:
-                f.write(content)
+                f.write(content_html)
+          # For the .ts files we remove the showSnackbar
+          elif fpath.endswith('.ts'):
+            with open(fpath) as f:
+              content_ts = f.read()
+            # Find corresponding matches
+            matches = re.findall(snackbar_regex, content_ts)
+            for match in matches:
+                capture_keys = re.search(snackbar_capture, match)
+                json_keys = capture_keys.groups()[0].split('.')
+                keyError = False
+                current_json = translations
+                for key in json_keys:
+                  try: 
+                    current_json = current_json[key]
+                  except KeyError:
+                    keyError = True
+                    break
+                if keyError:
+                  print("**********************************************************")
+                  print("Translation not found for ", match)
+                  print("**********************************************************")
+                  continue
+                translation = current_json
+                content_ts = content_ts.replace(capture_keys.groups()[0], translation)
+                # Write the new content_html to the file again 
+                with open(fpath, "w") as f:
+                    f.write(content_ts)
+                
           else: 
             continue
       except UnicodeDecodeError:

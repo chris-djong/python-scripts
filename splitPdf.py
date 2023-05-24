@@ -2,6 +2,9 @@ from PyPDF2 import PdfFileWriter, PdfFileReader
 import os
 from tkinter import filedialog
 
+"""
+ Script can be used to split a pdf into multiple pages
+"""
 
 
 document = filedialog.askopenfilename(title='Please chose a pdf file')
